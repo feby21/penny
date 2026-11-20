@@ -54,7 +54,7 @@
         return '<li><span class="tick">✓</span>' + s + '</li>';
       }).join('') + '</ul></div>' +
       '<p class="small muted" style="margin:12px 0">Penny never sees your payment details. You can unlink at any time. (Demo: no real data is shared.)</p>' +
-      '<button type="button" class="btn btn-primary btn-block" data-action="nectar-link-scan">Allow and link Nectar</button>';
+      '<button type="button" class="btn btn-nectar btn-block" data-action="nectar-link-scan">Allow and link Nectar</button>';
     P.app.openSheet('Link your Nectar card', html);
   };
 

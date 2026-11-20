@@ -71,7 +71,7 @@
       }).join('') + '</div>';
 
     if (!shown.length) {
-      html += '<div class="card empty"><div class="empty-icon">🧺</div><strong>' +
+      html += '<div class="card empty"><strong>' +
         (items.length ? 'Nothing in the ' + ui.invFilter.toLowerCase() : 'Your kitchen is empty') + '</strong>' +
         (items.length ? 'Try another storage filter.' : 'Scan your Nectar card on Home or add an item by hand.') + '</div>';
       return html;
@@ -82,7 +82,7 @@
     cats.forEach(function (cat) {
       var group = shown.filter(function (i) { return i.category === cat; }).sort(sortByExpiry);
       if (!group.length) return;
-      html += '<div class="cat-group"><h3><span>' + (P.CATEGORY_EMOJI[cat] || '🛒') + '</span>' + U.esc(cat) +
+      html += '<div class="cat-group"><h3>' + U.esc(cat) +
         ' <span class="muted">(' + group.length + ')</span></h3><div class="cat-list">' + group.map(I.row).join('') + '</div></div>';
     });
     return html;

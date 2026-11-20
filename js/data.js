@@ -60,6 +60,13 @@ window.Penny = window.Penny || {};
   ];
 
   // Inline SVG icons used in templates.
+  // Image icons supplied for the demo (in /img).
+  P.IMG = {
+    alarm: function (cls) { return '<img class="' + (cls || 'alert-ico') + '" src="img/alarm.png" alt="">'; },
+    bell: function (cls) { return '<img class="' + (cls || 'alert-ico') + '" src="img/bell.png" alt="">'; },
+    nectar: function (cls) { return '<img class="' + (cls || 'nectar-logo') + '" src="img/nectar.png" alt="Nectar">'; },
+    recime: function (cls) { return '<img class="' + (cls || 'recime-logo') + '" src="img/recime.png" alt="ReciMe">'; }
+  };
   P.ICONS = {
     heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-9.2-9.3C1.7 7.5 3.8 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.2 0 5.3 3 4.2 6.2C19.5 15.4 12 20 12 20Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
     comment: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4 3.5v-3.5h0a1.5 1.5 0 0 1-1.5-1.5v-8.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
@@ -221,6 +228,21 @@ window.Penny = window.Penny || {};
   ];
 
   // Tags for seed and ReciMe recipes (cuisine, meal types, freezer-friendly, one pot, high protein).
+  // Recipe photos from Wikimedia Commons (free licences; credits shown on each recipe page).
+  P.RECIPE_IMAGES = {
+    'r-me-1': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Creamy_spinach_pasta_%284463852122%29.jpg/960px-Creamy_spinach_pasta_%284463852122%29.jpg', credit: 'Karen and Brad Emerson', licence: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Creamy_spinach_pasta_(4463852122).jpg' },
+    'r-me-2': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Nutella_Banana_Pancakes_-_Laughing_Dog_2026-08-25.jpg/960px-Nutella_Banana_Pancakes_-_Laughing_Dog_2026-08-25.jpg', credit: 'Andy Li', licence: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Nutella_Banana_Pancakes_-_Laughing_Dog_2026-08-25.jpg' },
+    'r-c-1': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Mushroom_Omelette_-_Breakfast_At_Tiffany%27s_Brighton.jpg/960px-Mushroom_Omelette_-_Breakfast_At_Tiffany%27s_Brighton.jpg', credit: 'Andy Li', licence: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Mushroom_Omelette_-_Breakfast_At_Tiffany%27s_Brighton.jpg' },
+    'r-c-2': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Spaghetti_bolognese_-_Enzo%27s_2026-04-21.jpg/960px-Spaghetti_bolognese_-_Enzo%27s_2026-04-21.jpg', credit: 'Andy Li', licence: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Spaghetti_bolognese_-_Enzo%27s_2026-04-21.jpg' },
+    'r-c-3': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Spinach-Chickpea_Curry_%283117324894%29.jpg/960px-Spinach-Chickpea_Curry_%283117324894%29.jpg', credit: 'Kari Sullivan from Austin, TX', licence: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Spinach-Chickpea_Curry_(3117324894).jpg' },
+    'r-c-4': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Fried_rice_with_egg.jpg/960px-Fried_rice_with_egg.jpg', credit: 'ProjectManhattan', licence: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File:Fried_rice_with_egg.jpg' },
+    'r-c-5': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/Fajitas_Wraps.JPG/960px-Fajitas_Wraps.JPG', credit: 'Miansari66', licence: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Fajitas_Wraps.JPG' },
+    'r-c-6': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Gratin_4.jpg/960px-Gratin_4.jpg', credit: 'Wxao Zexw', licence: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Gratin_4.jpg' },
+    'r-x-1': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Salmon_bowl.jpg/960px-Salmon_bowl.jpg', credit: 'Janine', licence: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Salmon_bowl.jpg' },
+    'r-x-2': { url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Mushroom_on_Toast_-_The_Canopy_2025-06-08.jpg/960px-Mushroom_on_Toast_-_The_Canopy_2025-06-08.jpg', credit: 'Andy Li', licence: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Mushroom_on_Toast_-_The_Canopy_2025-06-08.jpg' },
+    'r-x-3': { url: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Strawberries_%26_Yogurt.jpg', credit: 'Youmna9115', licence: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Strawberries_%26_Yogurt.jpg' }
+  };
+
   P.RECIPE_TAGS = {
     'r-me-1': { cuisine: 'Italian', meals: ['dinner'], freezer: false, onePot: false, highProtein: true },
     'r-me-2': { cuisine: 'American', meals: ['breakfast', 'snack'], freezer: true, onePot: false, highProtein: false },

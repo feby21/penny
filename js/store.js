@@ -100,6 +100,7 @@
       syncedDates: [],      // demo dates on which the Nectar scan has run
       lastSync: null,
       saved: [],            // community recipe ids saved by the user
+      savedEvents: [],      // community event ids saved by the user
       plan: { date: today, skip: [] },
       cooked: []
     };
@@ -108,6 +109,8 @@
   S.applyTags = function (r) {
     var t = P.RECIPE_TAGS[r.id];
     if (t && r.cuisine === undefined) Object.assign(r, U.clone(t));
+    var img = P.RECIPE_IMAGES[r.id];
+    if (img && !r.image) { r.image = img.url; r.imageCredit = U.clone(img); }
     return r;
   };
 

@@ -106,7 +106,7 @@
       btn = '<button type="button" class="scan-btn" disabled><span class="scan-icon">✓</span><span><strong>Basket synced for ' + U.fmtDate(st.demoDate) + '</strong>' +
         '<small>Move the demo date on to shop again</small></span></button>';
     } else {
-      btn = '<button type="button" class="scan-btn" data-action="nectar-scan"><span class="scan-icon">' + P.ICONS.card + '</span><span><strong>Scan Nectar card at Sainsbury’s</strong>' +
+      btn = '<button type="button" class="scan-btn" data-action="nectar-scan"><span class="scan-icon">' + P.IMG.nectar() + '</span><span><strong>Scan Nectar card at Sainsbury’s</strong>' +
         '<small>' + (linked ? 'Your basket syncs to Penny automatically' : 'Link Nectar once, then your shop syncs itself') + '</small></span></button>';
     }
 
@@ -114,10 +114,10 @@
       '<div class="sync-meta"><span class="dot' + (st.lastSync ? '' : ' off') + '"></span>Last sync: ' + U.esc(P.sync.lastSyncText()) +
       (linked ? '' : ' · <span>Nectar not linked</span>') + '</div>';
 
-    html += '<div class="card" style="margin-top:16px"><div class="card-head"><h2><span class="alert-ico today">⏰</span>Expiring today</h2>' +
+    html += '<div class="card" style="margin-top:16px"><div class="card-head"><h2>' + P.IMG.alarm() + 'Expiring today</h2>' +
       '<span class="chip chip-' + (todayItems.length ? 'expired' : 'neutral') + '">' + todayItems.length + '</span></div>' +
       homeList(todayItems, 'Nothing expires today 🎉') + '</div>';
-    html += '<div class="card"><div class="card-head"><h2><span class="alert-ico two">🔔</span>Expiring in 2 days</h2>' +
+    html += '<div class="card"><div class="card-head"><h2>' + P.IMG.bell() + 'Expiring in 2 days</h2>' +
       '<span class="chip chip-' + (twoItems.length ? 'soon' : 'neutral') + '">' + twoItems.length + '</span></div>' +
       homeList(twoItems, 'Nothing due in 2 days.') +
       (oneItems.length ? '<p class="small muted" style="margin-top:8px">Also tomorrow: ' + U.esc(U.list(oneItems.map(function (i) { return i.name; }))) + '</p>' : '') + '</div>';
@@ -179,16 +179,16 @@
         '<div class="ob-foot"><button type="button" class="btn btn-primary btn-block" data-action="ob-next">Continue</button>' +
         '<button type="button" class="link-btn" data-action="ob-back">Back</button></div>';
     } else if (ob.step === 2) {
-      body = '<div class="ob-hero"><div class="big">💳</div><h1>Connect Nectar</h1><p>Scan your Nectar card at Sainsbury’s as usual and your basket syncs to Penny. No typing.</p></div>' +
+      body = '<div class="ob-hero"><div class="big">' + P.IMG.nectar('ob-logo') + '</div><h1>Connect Nectar</h1><p>Scan your Nectar card at Sainsbury’s as usual and your basket syncs to Penny. No typing.</p></div>' +
         '<div class="ob-body"><div class="card"><b>What Nectar shares</b><ul class="share-list">' +
         ['Product name and pack size', 'Quantity', 'Price paid', 'Purchase date'].map(function (s) { return '<li><span class="tick">✓</span>' + s + '</li>'; }).join('') +
         '</ul></div><p class="small muted" style="margin-top:10px">Simulated for this demo. You can unlink at any time.</p></div>' +
-        '<div class="ob-foot"><button type="button" class="btn btn-primary btn-block" data-action="ob-nectar">Connect Nectar</button>' +
+        '<div class="ob-foot"><button type="button" class="btn btn-nectar btn-block" data-action="ob-nectar">Connect Nectar</button>' +
         '<button type="button" class="link-btn" data-action="ob-next">Skip for now (add food by hand)</button></div>';
     } else {
-      body = '<div class="ob-hero"><div class="big">📲</div><h1>Connect ReciMe</h1><p>Recipes you saved from Instagram and TikTok show up in Penny and feed your meal plans.</p></div>' +
-        '<div class="ob-body"><div class="recime-card"><div class="recime-logo">R</div><div class="grow"><b>ReciMe</b><div class="small muted">Optional. Imports 3 saved recipes in this demo.</div></div></div></div>' +
-        '<div class="ob-foot"><button type="button" class="btn btn-primary btn-block" data-action="ob-recime"' + (A.ui.reciMeLoading ? ' disabled' : '') + '>' +
+      body = '<div class="ob-hero"><div class="big">' + P.IMG.recime('ob-logo rounded') + '</div><h1>Connect ReciMe</h1><p>Recipes you saved from Instagram and TikTok show up in Penny and feed your meal plans.</p></div>' +
+        '<div class="ob-body"><div class="recime-card">' + P.IMG.recime() + '<div class="grow"><b>ReciMe</b><div class="small muted">Optional. Imports 3 saved recipes in this demo.</div></div></div></div>' +
+        '<div class="ob-foot"><button type="button" class="btn btn-recime btn-block" data-action="ob-recime"' + (A.ui.reciMeLoading ? ' disabled' : '') + '>' +
         (A.ui.reciMeLoading ? 'Linking…' : 'Connect ReciMe') + '</button>' +
         '<button type="button" class="link-btn" data-action="ob-finish">Maybe later</button></div>';
     }
@@ -221,7 +221,7 @@
   P.actions['ob-nectar'] = function () {
     P.store.state.user.nectarLinked = true;
     P.store.save();
-    A.toast('Nectar linked', 'success', '💳');
+    A.toast('Nectar linked', 'success');
     A.ui.ob.step = 3;
     A.renderOnboarding();
   };

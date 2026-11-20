@@ -68,17 +68,17 @@
 
   // Quick filters students tend to reach for. Each is a yes/no test on a recipe.
   R.QUICK = [
-    { id: 'freezer', label: '❄️ Freezer-friendly', test: function (r) { return !!r.freezer; } },
-    { id: 'quick', label: '⚡ 20 min or less', test: function (r) { return r.timeMinutes <= 20; } },
-    { id: 'budget', label: '💷 Under £1.50 a portion', test: function (r) { return R.costPerServing(r) <= 1.5; } },
-    { id: 'have', label: '🧺 Cook with what I have', test: function (r) { return P.mealplan.match(r, P.mealplan.availableItems(0), {}).missing.length <= 1; } },
-    { id: 'veggie', label: '🌱 Vegetarian', test: function (r) { return R.fitsDiet(r, 'vegetarian'); } },
-    { id: 'vegan', label: '🌿 Vegan', test: function (r) { return R.fitsDiet(r, 'vegan'); } },
-    { id: 'protein', label: '💪 High protein', test: function (r) { return !!r.highProtein; } },
-    { id: 'onepot', label: '🍲 One pot', test: function (r) { return !!r.onePot; } },
-    { id: 'few', label: '🖐 5 ingredients or fewer', test: function (r) { return mainIngredients(r).length <= 5; } },
-    { id: 'batch', label: '📦 Batch cook (serves 4+)', test: function (r) { return r.servings >= 4; } },
-    { id: 'safe', label: '✅ Safe for my allergies', test: function (r) {
+    { id: 'freezer', label: 'Freezer-friendly', test: function (r) { return !!r.freezer; } },
+    { id: 'quick', label: '20 min or less', test: function (r) { return r.timeMinutes <= 20; } },
+    { id: 'budget', label: 'Under £1.50 a portion', test: function (r) { return R.costPerServing(r) <= 1.5; } },
+    { id: 'have', label: 'Cook with what I have', test: function (r) { return P.mealplan.match(r, P.mealplan.availableItems(0), {}).missing.length <= 1; } },
+    { id: 'veggie', label: 'Vegetarian', test: function (r) { return R.fitsDiet(r, 'vegetarian'); } },
+    { id: 'vegan', label: 'Vegan', test: function (r) { return R.fitsDiet(r, 'vegan'); } },
+    { id: 'protein', label: 'High protein', test: function (r) { return !!r.highProtein; } },
+    { id: 'onepot', label: 'One pot', test: function (r) { return !!r.onePot; } },
+    { id: 'few', label: '5 ingredients or fewer', test: function (r) { return mainIngredients(r).length <= 5; } },
+    { id: 'batch', label: 'Batch cook (serves 4+)', test: function (r) { return r.servings >= 4; } },
+    { id: 'safe', label: 'Safe for my allergies', test: function (r) {
       var mine = P.store.state.user.allergies;
       return !R.allergensOf(r).some(function (a) { return mine.indexOf(a) !== -1; });
     } }
@@ -111,25 +111,39 @@
     });
   };
 
+  function tagSummary(f) {
+    return f.tags.length ? 'Filters (' + f.tags.length + ')' : 'Filters';
+  }
+  // A single-choice dropdown styled like the Filters one: a button that opens a panel of options.
+  function pickDropdown(key, label, value, options) {
+    var cur = options.find(function (o) { return o.id === value; });
+    return '<details class="dd-multi" data-dd="' + key + '"' + (P.app.ui.openDd === key ? ' open' : '') + '>' +
+      '<summary class="dd' + (value !== 'any' ? ' on' : '') + '" aria-label="' + label + '">' + (cur ? U.esc(cur.label) : label) + '</summary>' +
+      '<div class="dd-panel" role="listbox" aria-label="' + label + '">' +
+      [{ id: 'any', label: 'Any ' + label.toLowerCase() }].concat(options).map(function (o) {
+        var on = o.id === value;
+        return '<button type="button" class="dd-option' + (on ? ' on' : '') + '" role="option" aria-selected="' + on + '" data-action="recipe-pick" data-key="' + key + '" data-value="' + U.esc(o.id) + '">' +
+          '<span class="dd-tick">' + (on ? '✓' : '') + '</span>' + U.esc(o.label) + '</button>';
+      }).join('') + '</div></details>';
+  }
   R.filterBar = function () {
     var f = R.filters();
     var st = P.store.state;
     var quick = R.QUICK.filter(function (t) { return t.id !== 'safe' || st.user.allergies.length; });
     var n = R.activeCount(f);
     return '<div class="filter-bar">' +
-      '<div class="search-row"><input type="search" id="recipe-search" placeholder="Search dish or ingredient" value="' + U.esc(f.q) + '" aria-label="Search recipes" autocomplete="off">' +
-      '<select id="recipe-cuisine" aria-label="Cuisine"><option value="any">All cuisines</option>' +
-      P.CUISINES.map(function (c) { return '<option' + (f.cuisine === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div>' +
-      '<div class="filter-row" role="group" aria-label="Meal">' +
-      [{ id: 'any', label: 'Any meal', emoji: '' }].concat(P.MEALS).map(function (m) {
-        var on = f.meal === m.id;
-        return '<button type="button" class="filter-chip' + (on ? ' on' : '') + '" data-action="recipe-meal" data-value="' + m.id + '" aria-pressed="' + on + '">' + (m.emoji ? m.emoji + ' ' : '') + m.label + '</button>';
-      }).join('') + '</div>' +
-      '<div class="filter-row tags" role="group" aria-label="Quick filters">' +
+      '<div class="search-row"><input type="search" id="recipe-search" placeholder="Search dish or ingredient" value="' + U.esc(f.q) + '" aria-label="Search recipes" autocomplete="off"></div>' +
+      '<div class="dd-row">' +
+      pickDropdown('cuisine', 'Cuisine', f.cuisine, P.CUISINES.map(function (c) { return { id: c, label: c }; })) +
+      pickDropdown('meal', 'Meal', f.meal, P.MEALS.map(function (m) { return { id: m.id, label: m.label }; })) +
+      '<details class="dd-multi" data-dd="tags"' + (P.app.ui.openDd === 'tags' ? ' open' : '') + '>' +
+      '<summary class="dd' + (f.tags.length ? ' on' : '') + '" data-tag-summary>' + tagSummary(f) + '</summary>' +
+      '<div class="dd-panel" role="group" aria-label="Quick filters">' +
       quick.map(function (t) {
         var on = f.tags.indexOf(t.id) !== -1;
-        return '<button type="button" class="filter-chip small-chip' + (on ? ' on' : '') + '" data-action="recipe-tag" data-value="' + t.id + '" aria-pressed="' + on + '">' + t.label + '</button>';
-      }).join('') + '</div>' +
+        return '<label class="dd-option"><input type="checkbox" data-recipe-tag="' + t.id + '"' + (on ? ' checked' : '') + '> ' + t.label + '</label>';
+      }).join('') + '</div></details>' +
+      '</div>' +
       '<div class="filter-status"' + (n ? '' : ' hidden') + '><span data-filter-count>' + U.plural(n, 'filter') + ' on</span>' +
       '<button type="button" class="link-btn" data-action="recipe-clear">Clear all</button></div>' +
       '</div>';
@@ -159,24 +173,29 @@
       status.hidden = !n;
       status.querySelector('[data-filter-count]').textContent = U.plural(n, 'filter') + ' on';
     }
+    var sum = document.querySelector('[data-tag-summary]');
+    if (sum) {
+      sum.textContent = tagSummary(R.filters());
+      sum.classList.toggle('on', R.filters().tags.length > 0);
+    }
   };
 
   R.tagChips = function (r) {
     var chips = [];
     if (r.cuisine) chips.push(r.cuisine);
-    (r.meals || []).forEach(function (m) { var x = P.MEALS.find(function (y) { return y.id === m; }); if (x) chips.push(x.emoji + ' ' + x.label); });
-    if (r.freezer) chips.push('❄️ Freezer-friendly');
-    if (r.onePot) chips.push('🍲 One pot');
-    if (r.highProtein) chips.push('💪 High protein');
-    if (R.fitsDiet(r, 'vegan')) chips.push('🌿 Vegan'); else if (R.fitsDiet(r, 'vegetarian')) chips.push('🌱 Vegetarian');
-    chips.push('💷 ~' + U.money(R.costPerServing(r)) + ' a portion');
+    (r.meals || []).forEach(function (m) { var x = P.MEALS.find(function (y) { return y.id === m; }); if (x) chips.push(x.label); });
+    if (r.freezer) chips.push('Freezer-friendly');
+    if (r.onePot) chips.push('One pot');
+    if (r.highProtein) chips.push('High protein');
+    if (R.fitsDiet(r, 'vegan')) chips.push('Vegan'); else if (R.fitsDiet(r, 'vegetarian')) chips.push('Vegetarian');
+    chips.push('~' + U.money(R.costPerServing(r)) + ' a portion');
     return '<div class="chips tag-chips">' + chips.map(function (c) { return '<span class="use-chip">' + U.esc(c) + '</span>'; }).join('') + '</div>';
   };
 
   R.row = function (r, opts) {
     opts = opts || {};
     var meta = '<span>⏱ ' + r.timeMinutes + ' min</span><span>Serves ' + r.servings + '</span>' +
-      (r.cuisine ? '<span>' + U.esc(r.cuisine) + '</span>' : '') + (r.freezer ? '<span title="Freezer-friendly">❄️</span>' : '');
+      (r.cuisine ? '<span>' + U.esc(r.cuisine) + '</span>' : '') + (r.freezer ? '<span>Freezer-friendly</span>' : '');
     if (r.source === 'recime') meta += R.sourceTag(r);
     else if (opts.showAuthor) meta += '<span>by ' + U.esc(P.community.userName(r.authorId)) + '</span>';
     else meta += R.visTag(r);
@@ -196,9 +215,9 @@
       R.filterBar();
 
     if (!st.user.reciMeLinked && f.scope === 'mine') {
-      html += '<div class="recime-card"><div class="recime-logo">R</div><div class="grow"><b>Link ReciMe</b>' +
+      html += '<div class="recime-card">' + P.IMG.recime() + '<div class="grow"><b>Link ReciMe</b>' +
         '<div class="small muted">Bring in recipes you saved from Instagram and TikTok.</div></div>' +
-        '<button type="button" class="btn btn-small btn-primary" data-action="recime-link"' + (P.app.ui.reciMeLoading ? ' disabled' : '') + '>' +
+        '<button type="button" class="btn btn-small btn-recime" data-action="recime-link"' + (P.app.ui.reciMeLoading ? ' disabled' : '') + '>' +
         (P.app.ui.reciMeLoading ? 'Linking…' : 'Link') + '</button></div>';
     }
 
@@ -215,11 +234,11 @@
 
     html += '<div class="section-title"><h2>From ReciMe</h2><span class="count">' + (st.user.reciMeLinked ? 'Linked ✓' : 'Not linked') + '</span></div>';
     html += rec.length ? rec.map(function (r) { return R.row(r); }).join('') :
-      '<div class="card empty compact"><div class="empty-icon">📲</div><strong>Nothing imported</strong>Link ReciMe above to pull in your saved social recipes.</div>';
+      '<div class="card empty compact"><strong>Nothing imported</strong>Link ReciMe above to pull in your saved social recipes.</div>';
 
     html += '<div class="section-title"><h2>Saved from Community</h2><span class="count">' + saved.length + '</span></div>';
     html += saved.length ? saved.map(function (r) { return R.row(r, { showAuthor: true }); }).join('') :
-      '<div class="card empty compact"><div class="empty-icon">🔖</div><strong>No saved recipes</strong>Tap Save on a Community recipe to keep it here.</div>';
+      '<div class="card empty compact"><strong>No saved recipes</strong>Tap Save on a Community recipe to keep it here.</div>';
     return html;
   };
 
@@ -235,6 +254,7 @@
 
     var html = '<div class="back-bar"><button type="button" class="link-btn" data-action="overlay-back">' + P.ICONS.back + ' Back</button></div>' +
       '<div class="detail-hero">' + R.thumb(r) + '</div>' +
+      (r.imageCredit ? '<p class="photo-credit">Photo: <a href="' + U.esc(r.imageCredit.source) + '" target="_blank" rel="noopener">' + U.esc(r.imageCredit.credit) + '</a>, ' + U.esc(r.imageCredit.licence) + ', via Wikimedia Commons</p>' : '') +
       '<h1 class="detail-title">' + U.esc(r.title) + '</h1>' +
       '<div class="detail-meta"><span>by ' + U.esc(P.community.userName(r.authorId)) + '</span><span>⏱ ' + r.timeMinutes + ' min</span>' +
       '<span>Serves ' + r.servings + '</span>' + R.sourceTag(r) + (own ? R.visTag(r) : '') + '</div>' + R.tagChips(r);
@@ -314,12 +334,12 @@
       P.CUISINES.map(function (c) { return '<option' + (c === 'Other' ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div>' +
       '<div class="field"><span class="label">Good for</span><div class="choice-grid">' +
       P.MEALS.map(function (m) {
-        return '<label class="choice check-choice"><input type="checkbox" name="meal" value="' + m.id + '"' + (m.id === 'dinner' ? ' checked' : '') + '> ' + m.emoji + ' ' + m.label + '</label>';
+        return '<label class="choice check-choice"><input type="checkbox" name="meal" value="' + m.id + '"' + (m.id === 'dinner' ? ' checked' : '') + '> ' + m.label + '</label>';
       }).join('') + '</div></div>' +
       '<div class="field"><span class="label">Tags</span><div class="choice-grid">' +
-      '<label class="choice check-choice"><input type="checkbox" name="freezer"> ❄️ Freezer-friendly</label>' +
-      '<label class="choice check-choice"><input type="checkbox" name="onePot"> 🍲 One pot</label>' +
-      '<label class="choice check-choice"><input type="checkbox" name="highProtein"> 💪 High protein</label>' +
+      '<label class="choice check-choice"><input type="checkbox" name="freezer"> Freezer-friendly</label>' +
+      '<label class="choice check-choice"><input type="checkbox" name="onePot"> One pot</label>' +
+      '<label class="choice check-choice"><input type="checkbox" name="highProtein"> High protein</label>' +
       '</div></div>' +
       '<div class="field"><label for="rf-img">Image URL (optional)</label><input id="rf-img" name="image" type="url" placeholder="https://…"></div>' +
       '<label class="switch"><span><b>Public</b><br><span class="small muted">Share to the Community Hub</span></span><input type="checkbox" name="public" checked aria-label="Public recipe"></label>' +
@@ -383,7 +403,7 @@
       st.user.reciMeLinked = true;
       P.store.save();
       P.app.ui.reciMeLoading = false;
-      P.app.toast('ReciMe linked: imported ' + P.RECIME_RECIPES.length + ' recipes', 'success', '📲');
+      P.app.toast('ReciMe linked: imported ' + P.RECIME_RECIPES.length + ' recipes', 'success', P.IMG.recime('t-img rounded'));
       if (done) done(); else P.app.render();
     }, 900);
   };
@@ -409,9 +429,33 @@
     R.updateResults();
   });
   document.addEventListener('change', function (e) {
-    if (e.target.id !== 'recipe-cuisine') return;
-    R.filters().cuisine = e.target.value;
+    var el = e.target;
+    if (el.dataset && el.dataset.recipeTag) {
+      // Tick boxes update results in place so the Filters dropdown stays open.
+      var tags = R.filters().tags, i = tags.indexOf(el.dataset.recipeTag);
+      if (el.checked && i === -1) tags.push(el.dataset.recipeTag);
+      if (!el.checked && i !== -1) tags.splice(i, 1);
+      R.updateResults();
+    }
+  });
+  P.actions['recipe-pick'] = function (el) {
+    R.filters()[el.dataset.key] = el.dataset.value;
+    P.app.ui.openDd = null;
     P.app.render();
+  };
+  // Only one dropdown open at a time; remember which so a re-render keeps it open.
+  document.addEventListener('toggle', function (e) {
+    var d = e.target;
+    if (!d.classList || !d.classList.contains('dd-multi')) return;
+    if (d.open) {
+      P.app.ui.openDd = d.dataset.dd;
+      document.querySelectorAll('.dd-multi[open]').forEach(function (o) { if (o !== d) o.open = false; });
+    } else if (P.app.ui.openDd === d.dataset.dd) P.app.ui.openDd = null;
+  }, true);
+  // Tapping anywhere outside an open dropdown closes it.
+  document.addEventListener('click', function (e) {
+    var dd = document.querySelector('.dd-multi[open]');
+    if (dd && !dd.contains(e.target)) dd.open = false;
   });
   P.actions['recime-link'] = function () { R.linkReciMe(); };
   P.actions['open-recipe'] = function (el) { P.app.openOverlay({ type: 'recipe', id: el.dataset.id }); };

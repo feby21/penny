@@ -40,7 +40,7 @@
       P.store.save();
       if (!silent) {
         created.forEach(function (n) {
-          P.app.toast(N.title(n), n.type === 'today' ? 'today' : 'alert', n.type === 'today' ? '⏰' : '🔔', true);
+          P.app.toast(N.title(n), n.type === 'today' ? 'today' : 'alert', n.type === 'today' ? P.IMG.alarm('t-img') : P.IMG.bell('t-img'), true);
         });
       }
     }
@@ -70,7 +70,7 @@
     html += list.map(function (n) {
       var isToday = n.type === 'today';
       return '<article class="notif' + (n.read ? '' : ' unread') + '">' +
-        '<div class="alert-ico ' + (isToday ? 'today' : 'two') + '">' + (isToday ? '⏰' : '🔔') + '</div>' +
+        (isToday ? P.IMG.alarm() : P.IMG.bell()) +
         '<div class="grow"><div class="notif-title">' + (n.read ? '' : '<span class="unread-dot" aria-label="Unread"></span>') + U.esc(N.title(n)) + '</div>' +
         '<div class="notif-body">' + U.esc(N.body(n)) + '</div>' +
         '<div class="notif-foot"><span>' + (isToday ? 'Expires today' : '2-day reminder') + ' · ' + U.fmtDay(n.date) + '</span>' +

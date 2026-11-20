@@ -22,6 +22,7 @@
   C.feed = function (sort, filter) {
     var st = P.store.state;
     var list = [];
+    if (filter === 'saved') return (st.events || []).filter(C.isSaved).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     if (filter !== 'events') list = list.concat(st.recipes.filter(function (r) { return r.visibility === 'public'; }));
     if (filter !== 'recipes') list = list.concat(st.events || []);
     var pop = function (x) { return x.going ? x.going.length : x.likes.length; };
@@ -46,26 +47,23 @@
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return '<div class="date-badge"><b>' + (+p[2]) + '</b><span>' + months[+p[1] - 1] + '</span></div>';
   };
-  C.goingButton = function (e) {
-    var going = e.going.indexOf('me') !== -1;
-    if (C.isPast(e)) return '<span class="tag">Event ended</span>';
-    if (!going && !C.spotsLeft(e)) return '<span class="tag tag-private">Fully booked</span>';
-    return '<button type="button" class="pill-btn' + (going ? ' going' : '') + '" data-action="event-going" data-id="' + e.id + '" aria-pressed="' + going + '">' +
-      (going ? '✓ Going' : '🙋 I’m going') + '</button>';
+  C.isSaved = function (e) { return (P.store.state.savedEvents || []).indexOf(e.id) !== -1; };
+  C.saveEventButton = function (e) {
+    var on = C.isSaved(e);
+    return '<button type="button" class="pill-btn' + (on ? ' saved' : '') + '" data-action="event-save" data-id="' + e.id + '" aria-pressed="' + on + '">' +
+      P.ICONS.bookmark + (on ? 'Saved' : 'Save event') + '</button>';
   };
 
   C.eventCard = function (e) {
     var past = C.isPast(e);
     return '<article class="rcard ecard' + (past ? ' past' : '') + '">' +
-      '<button type="button" class="rcard-thumb" data-action="open-event" data-id="' + e.id + '" aria-label="Open ' + U.esc(e.title) + '">' +
-      '<div class="thumb" style="background:' + U.esc(e.color) + '"><span>' + e.emoji + '</span>' + C.dateBadge(e) +
-      '<span class="event-flag">Event · Bristol</span></div></button>' +
       '<div class="rcard-body">' +
+      '<div class="ecard-top">' + C.dateBadge(e) + '<span class="event-flag">Event · Bristol</span></div>' +
       '<div class="author">' + C.avatar(e.hostId) + '<span>Hosted by ' + U.esc(C.userName(e.hostId)) + ' · ' + U.timeAgo(e.createdAt) + '</span></div>' +
       '<button type="button" class="rcard-title" data-action="open-event" data-id="' + e.id + '">' + U.esc(e.title) + '</button>' +
       '<div class="event-meta"><span>🗓 ' + C.eventWhen(e) + '</span><span>📍 ' + U.esc(e.venue) + ', ' + U.esc(e.area) + '</span></div>' +
       '<div class="rcard-meta">' + e.going.length + ' going' + (past ? '' : ' · ' + U.plural(C.spotsLeft(e), 'spot') + ' left') + ' · ' + C.priceText(e) + '</div>' +
-      '<div class="rcard-actions">' + C.goingButton(e) +
+      '<div class="rcard-actions">' + C.saveEventButton(e) +
       '<button type="button" class="pill-btn" data-action="open-event" data-id="' + e.id + '" aria-label="Comments (' + C.commentsFor(e.id).length + ')">' + P.ICONS.comment + C.commentsFor(e.id).length + '</button>' +
       '</div></div></article>';
   };
@@ -76,9 +74,8 @@
     var past = C.isPast(e);
     var faces = e.going.slice(0, 6).map(function (uid) { return C.avatar(uid); }).join('');
     return '<div class="back-bar"><button type="button" class="link-btn" data-action="overlay-back">' + P.ICONS.back + ' Back</button></div>' +
-      '<div class="detail-hero"><div class="thumb" style="background:' + U.esc(e.color) + '"><span>' + e.emoji + '</span>' + C.dateBadge(e) +
-      '<span class="event-flag">Event · Bristol</span></div></div>' +
-      '<h1 class="detail-title">' + U.esc(e.title) + '</h1>' +
+      '<div class="ecard-top">' + C.dateBadge(e) + '<span class="event-flag">Event · Bristol</span></div>' +
+      '<h1 class="detail-title event-title">' + U.esc(e.title) + '</h1>' +
       '<div class="detail-meta"><span>Hosted by ' + U.esc(C.userName(e.hostId)) + '</span>' +
       e.tags.map(function (t) { return '<span class="tag tag-public">' + U.esc(t) + '</span>'; }).join('') + '</div>' +
       '<div class="dl">' +
@@ -89,7 +86,7 @@
       '</div>' +
       '<div class="card"><p>' + U.esc(e.description) + '</p>' +
       '<div class="going-row"><div class="faces">' + faces + '</div><span class="small muted">' + e.going.length + ' going</span>' +
-      '<span style="margin-left:auto">' + C.goingButton(e) + '</span></div></div>' +
+      '<span style="margin-left:auto">' + C.saveEventButton(e) + '</span></div></div>' +
       '<p class="small muted" style="margin-top:10px">Demo content: hosts and venues are made up for this prototype.</p>' +
       C.commentsHtml(e);
   };
@@ -123,11 +120,13 @@
       '<button type="button" class="' + (sort === 'liked' ? 'on' : '') + '" data-action="community-sort" data-value="liked" aria-pressed="' + (sort === 'liked') + '">Most liked</button>' +
       '</div></div><p class="page-sub">Budget recipes and cook-together events around Bristol.</p>' +
       '<div class="filter-row" role="group" aria-label="Show">' +
-      [['all', 'All'], ['recipes', 'Recipes'], ['events', 'Events near you']].map(function (f) {
+      [['all', 'All'], ['recipes', 'Recipes'], ['events', 'Events near you'], ['saved', 'Saved events']].map(function (f) {
         return '<button type="button" class="filter-chip' + (filter === f[0] ? ' on' : '') + '" data-action="community-filter" data-value="' + f[0] + '" aria-pressed="' + (filter === f[0]) + '">' + f[1] + '</button>';
       }).join('') + '</div>';
     if (!feed.length) {
-      return html + (filter === 'events'
+      return html + (filter === 'saved'
+        ? '<div class="card empty"><strong>No saved events</strong>Tap Save event on any event to keep it here.</div>'
+        : filter === 'events'
         ? '<div class="card empty"><div class="empty-icon">📅</div><strong>No events right now</strong>Check back soon for cook-togethers near you.</div>'
         : '<div class="card empty"><div class="empty-icon">👩‍🍳</div><strong>No public recipes yet</strong>Upload a recipe and make it public to start the feed.</div>');
     }
@@ -176,17 +175,18 @@
   P.actions['community-sort'] = function (el) { P.app.ui.communitySort = el.dataset.value; P.app.render(); };
   P.actions['community-filter'] = function (el) { P.app.ui.communityFilter = el.dataset.value; P.app.render(); };
   P.actions['open-event'] = function (el) { P.app.openOverlay({ type: 'event', id: el.dataset.id }); };
-  P.actions['event-going'] = function (el) {
+  P.actions['event-save'] = function (el) {
+    var st = P.store.state;
     var e = C.getEvent(el.dataset.id);
-    if (!e || C.isPast(e)) return;
-    var i = e.going.indexOf('me');
+    if (!e) return;
+    if (!st.savedEvents) st.savedEvents = [];
+    var i = st.savedEvents.indexOf(e.id);
     if (i === -1) {
-      if (!C.spotsLeft(e)) return;
-      e.going.push('me');
-      P.app.toast('You’re going to ' + e.title + ' (' + C.eventWhen(e) + ')', 'success', '🎉');
+      st.savedEvents.push(e.id);
+      P.app.toast('Saved ' + e.title + ' to Saved events', 'success');
     } else {
-      e.going.splice(i, 1);
-      P.app.toast('You’re no longer going to ' + e.title);
+      st.savedEvents.splice(i, 1);
+      P.app.toast('Removed ' + e.title + ' from Saved events');
     }
     P.store.save();
     P.app.render();
