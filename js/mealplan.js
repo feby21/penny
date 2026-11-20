@@ -153,8 +153,7 @@
         '<div class="plan-day">' + dayLabel(k, e.date) + '</div>' +
         '<div class="plan-top">' + P.recipes.thumb(e.recipe) +
         '<div class="grow"><button type="button" class="plan-title" data-action="open-recipe" data-id="' + e.recipe.id + '">' + U.esc(e.recipe.title) + '</button>' +
-        '<div class="small muted">⏱ ' + e.recipe.timeMinutes + ' min · Serves ' + e.recipe.servings + '</div></div>' +
-        '<div class="score" style="--p:' + e.score.total + '" title="Food-saving score"><span>' + e.score.total + '</span></div></div>' +
+        '<div class="small muted">⏱ ' + e.recipe.timeMinutes + ' min · Serves ' + e.recipe.servings + '</div></div></div>' +
         '<p class="why">💡 ' + U.esc(e.why) + '</p>' +
         '<div class="plan-label">Uses from your kitchen</div><div class="chips">' + M.useChips(e) + '</div>' +
         '<div class="plan-label">To buy</div><div class="chips">' + M.buyChips(e) + '</div>' +

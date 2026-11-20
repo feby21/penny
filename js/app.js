@@ -133,7 +133,7 @@
       var e = plan[0];
       html += '<div class="card"><div class="meal-card">' + P.recipes.thumb(e.recipe) +
         '<div style="flex:1;min-width:0"><button type="button" class="plan-title" data-action="open-recipe" data-id="' + e.recipe.id + '">' + U.esc(e.recipe.title) + '</button>' +
-        '<div class="small muted">⏱ ' + e.recipe.timeMinutes + ' min · food-saving score ' + e.score.total + '</div></div></div>' +
+        '<div class="small muted">⏱ ' + e.recipe.timeMinutes + ' min · Serves ' + e.recipe.servings + '</div></div></div>' +
         '<p class="why">💡 ' + U.esc(e.why) + '</p><div class="chips">' + P.mealplan.useChips(e) + '</div></div>';
     } else {
       html += '<div class="card empty compact"><div class="empty-icon">🍽️</div><strong>No suggestion yet</strong>Scan your Nectar card or add recipes to get ideas.</div>';
